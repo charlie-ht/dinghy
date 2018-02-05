@@ -56,11 +56,11 @@ if (DY_USE_WEBKITGTK)
 	pkg_check_modules(WEB_ENGINE REQUIRED webkit2gtk-4.0)
 else ()
 	pkg_check_modules(WEB_ENGINE REQUIRED wpe-webkit)
+	pkg_check_modules(WPE_BACKEND REQUIRED wpe)
 endif ()
 
-set(DINGHYCORE_INCLUDE_DIRS ${WEB_ENGINE_INCLUDE_DIRS})
-set(DINGHYCORE_LIBRARARIES ${WEB_ENGINE_LIBRARIES})
-
+set(DINGHYCORE_INCLUDE_DIRS ${WEB_ENGINE_INCLUDE_DIRS} ${WPE_BACKEND_INCLUDE_DIRS})
+set(DINGHYCORE_LIBRARIES ${WEB_ENGINE_LIBRARIES} ${WPE_BACKEND_LDFLAGS})
 
 if (DY_USE_MODE_MONITOR)
 	list(APPEND DINGHYCORE_SOURCES
@@ -79,7 +79,7 @@ if (DY_USE_MODE_MONITOR)
 		list(APPEND DINGHYCORE_SOURCES dy-drm-mode-monitor.c)
 		list(APPEND DINGHYCORE_API_HEADERS dy-drm-mode-monitor.h)
 		list(APPEND DINGHYCORE_INCLUDE_DIRS ${UDEV_INCLUDE_DIRS} ${LIBDRM_INCLUDE_DIRS})
-		list(APPEND DINGHYCORE_LIBRARARIES ${UDEV_LIBRARIES} ${LIBDRM_LIBRARIES})
+		list(APPEND DINGHYCORE_LIBRARIES ${UDEV_LIBRARIES} ${LIBDRM_LIBRARIES})
 	else ()
 		message(WARNING "DRM/KMS mode monitor won't be built: libudev not found")
 	endif ()
@@ -88,12 +88,12 @@ endif ()
 add_library(dinghycore ${DINGHYCORE_SOURCES})
 set_property(TARGET dinghycore PROPERTY C_STANDARD 99)
 target_include_directories(dinghycore PUBLIC ${DINGHYCORE_INCLUDE_DIRS})
-target_link_libraries(dinghycore ${DINGHYCORE_LIBRARARIES})
+target_link_libraries(dinghycore ${DINGHYCORE_LIBRARIES})
 
 add_executable(dinghy dinghy.c)
 set_property(TARGET dinghy PROPERTY C_STANDARD 99)
 target_link_libraries(dinghy dinghycore)
-		
+
 install(TARGETS dinghy
 	DESTINATION ${CMAKE_INSTALL_BINDIR}
 	COMPONENT "runtime"
